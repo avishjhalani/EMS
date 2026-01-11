@@ -10,11 +10,6 @@ import org.hibernate.service.ServiceRegistry;
 
 import net.javaguides.usermanagement.model.User;
 
-/**
- * Java based configuration
- * @author ramesh Fadatare
- *
- */
 public class HibernateUtil {
 	private static SessionFactory sessionFactory;
 
@@ -23,28 +18,33 @@ public class HibernateUtil {
 			try {
 				Configuration configuration = new Configuration();
 
-				// Hibernate settings equivalent to hibernate.cfg.xml's properties
 				Properties settings = new Properties();
+
+				// MySQL JDBC Driver
 				settings.put(Environment.DRIVER, "com.mysql.jdbc.Driver");
-				settings.put(Environment.URL, "jdbc:mysql://localhost:3306/demo?useSSL=false");
-				settings.put(Environment.USER, "root");
-				settings.put(Environment.PASS, "root");
+
+				// ✅ Environment variables (Railway / Cloud)
+				settings.put(Environment.URL, System.getenv("MYSQL_URL"));
+				settings.put(Environment.USER, System.getenv("MYSQL_USER"));
+				settings.put(Environment.PASS, System.getenv("MYSQL_PASSWORD"));
+
 				settings.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
-
 				settings.put(Environment.SHOW_SQL, "true");
-
 				settings.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
 
-				settings.put(Environment.HBM2DDL_AUTO, "create-drop");
+				// ⚠️ IMPORTANT: change create-drop for production
+				settings.put(Environment.HBM2DDL_AUTO, "update");
 
 				configuration.setProperties(settings);
 				configuration.addAnnotatedClass(User.class);
 
 				ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-						.applySettings(configuration.getProperties()).build();
-				System.out.println("Hibernate Java Config serviceRegistry created");
+						.applySettings(configuration.getProperties())
+						.build();
+
+				System.out.println("Hibernate ServiceRegistry created");
+
 				sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-				return sessionFactory;
 
 			} catch (Exception e) {
 				e.printStackTrace();
